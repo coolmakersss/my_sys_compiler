@@ -1,0 +1,52 @@
+package TreeNodes;
+
+import Lexer.SyntaxKind;
+import static Lexer.SyntaxKind.getPrint;
+
+import java.io.IOException;
+import java.io.OutputStreamWriter;
+import java.util.ArrayList;
+
+
+
+public class Node {
+    protected int startLine;
+    protected int finishLine;
+    protected SyntaxKind kind;
+    protected ArrayList<Node> children = new ArrayList<>();
+
+    public void setNodeElement(SyntaxKind syntaxKind, int line) {
+        this.kind = syntaxKind;
+        this.startLine = this.finishLine = line;
+    }
+
+    public void setNodeElement(SyntaxKind syntaxKind) {
+        this.kind = syntaxKind;
+        this.startLine = children.get(0).startLine;
+        this.finishLine = children.get(children.size() - 1).finishLine;
+    }
+
+    public void print(OutputStreamWriter writer) throws IOException {
+        for (Node child : children) {
+            child.print(writer);
+        }
+        writer.append('<').append(getPrint(kind)).append('>').append("\n");
+    }
+
+    public int getStartLine() {
+        return startLine;
+    }
+
+    public int getFinishLine() {
+        return finishLine;
+    }
+
+    public void addChild(Node child) {
+        children.add(0, child);
+    }
+
+    public SyntaxKind getKind() {
+        return kind;
+    }
+
+}
