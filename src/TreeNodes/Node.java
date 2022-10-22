@@ -1,6 +1,10 @@
 package TreeNodes;
-
 import Lexer.SyntaxKind;
+import Parser.ErrorCheckCtx;
+import Parser.ErrorCheckRet;
+import Parser.Errorkind;
+import Tools.Pair;
+
 import static Lexer.SyntaxKind.getPrint;
 
 import java.io.IOException;
@@ -31,6 +35,11 @@ public class Node {
             child.print(writer);
         }
         writer.append('<').append(getPrint(kind)).append('>').append("\n");
+    }
+    public void checkError(ArrayList<Pair<Errorkind, Integer>> errorlist, ErrorCheckCtx ctx, ErrorCheckRet ret) {
+        for (Node child : children) {
+            child.checkError(errorlist, ctx, ret);
+        }
     }
 
     public int getStartLine() {

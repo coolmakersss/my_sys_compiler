@@ -17,4 +17,8 @@ public class TokenNode extends Node {
     public void print(OutputStreamWriter writer) throws IOException {
         writer.append(String.valueOf(kind)).append(" ").append(content).append("\n");
     }
+
+    public String getContent(){
+        return content;
+    }
 }

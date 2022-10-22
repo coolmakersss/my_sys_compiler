@@ -1,5 +1,6 @@
 import Lexer.*;
 import TreeNodes.*;
+import Parser.*;
 
 import static Lexer.SyntaxKind.expFirst;
 
@@ -51,7 +52,7 @@ public class Parser {
         terminalSymbol();
         terminalSymbol();
         terminalSymbol();
-        terminalSymbol();
+        checkToken(SyntaxKind.RPARENT, Errorkind.R_PAREN_LACKED);
         block();
         build.finishNode(new MainFuncDef());
     }
@@ -75,7 +76,7 @@ public class Parser {
         while (tokens.first().kind == SyntaxKind.INTTK) {
             funcFormalParams();
         }
-        terminalSymbol(); //)
+        checkToken(SyntaxKind.RPARENT,Errorkind.R_PAREN_LACKED); //)
         block();
         build.finishNode(new FuncDefNode());
     }
@@ -96,11 +97,11 @@ public class Parser {
         terminalSymbol();
         if(tokens.first().kind == SyntaxKind.LBRACK){
             terminalSymbol();
-            terminalSymbol();
+            checkToken(SyntaxKind.RBRACK,Errorkind.R_BRACKET_LACKED);
             while(tokens.first().kind == SyntaxKind.LBRACK) {
                 terminalSymbol();
                 constExp();
-                terminalSymbol();
+                checkToken(SyntaxKind.RBRACK,Errorkind.R_BRACKET_LACKED);
             }
         }
         build.finishNode(new FuncFormalParamNode());
@@ -129,15 +130,16 @@ public class Parser {
         build.finishNode(new BlockNode());
     }
 
+//??????????????????????????????
     private void stmt() {
         build.startNode(SyntaxKind.STMT);
         SyntaxKind kind = tokens.first().kind;
         if (expFirst(kind)) {
             if(kind!=SyntaxKind.IDENFR) {
                 exp();
-                terminalSymbol();
+                checkToken(SyntaxKind.SEMICN,Errorkind.SEMICOLON_LACKED);
             }
-            else{
+            /*else{
                 int i=1,flag=0;
                 while(tokens.ntoken(i).kind != SyntaxKind.SEMICN){
                     if(tokens.ntoken(i).kind == SyntaxKind.ASSIGN){
@@ -163,54 +165,129 @@ public class Parser {
                         System.out.println("error!");
                     }
                 }
+            }*/
+            //兼容缺少分号的错误处理
+            else{
+                if(tokens.ntoken(1).kind==SyntaxKind.LPARENT){
+                    exp();
+                    checkToken(SyntaxKind.SEMICN,Errorkind.SEMICOLON_LACKED);
+                }
+                else{
+                    int i=1,flag = 0;
+                    while(tokens.ntoken(i).kind == SyntaxKind.LBRACK || flag >=1){
+                        if(tokens.ntoken(i).kind == SyntaxKind.LBRACK){
+                            flag+=1;
+                        }
+                        if(tokens.ntoken(i).kind == SyntaxKind.RBRACK){
+                            flag-=1;
+                        }
+                        i++;
+                    }
+                    if(tokens.ntoken(i).kind == SyntaxKind.ASSIGN){
+                        lval();
+                        terminalSymbol();//System.out.println(tokens.ntoken(0).kind);
+                        if(tokens.first().kind == SyntaxKind.GETINTTK){ // LVal '=' 'getint''('')'';'
+                            terminalSymbol();
+                            terminalSymbol();
+                            terminalSymbol();
+                            checkToken(SyntaxKind.SEMICN,Errorkind.SEMICOLON_LACKED);
+                        } else { // LVal '=' Exp ';'
+                            exp();
+                            checkToken(SyntaxKind.SEMICN,Errorkind.SEMICOLON_LACKED);
+                        }
+                    } else {
+                        exp();
+                        checkToken(SyntaxKind.SEMICN,Errorkind.SEMICOLON_LACKED);
+                    }
+                }
             }
         } else if(kind == SyntaxKind.SEMICN){
             terminalSymbol();
         } else if (kind == SyntaxKind.LBRACE) {
             block();
         } else if (kind == SyntaxKind.IFTK) {
-            terminalSymbol();
-            terminalSymbol();
-            cond();
-            terminalSymbol();
-            stmt();
-            if(tokens.first().kind == SyntaxKind.ELSETK){
-                terminalSymbol();
-                stmt();
-            }
+            ifStmt();
         } else if (kind == SyntaxKind.WHILETK) {
-            terminalSymbol();
-            terminalSymbol();
-            cond();
-            terminalSymbol();
-            stmt();
+            whileStmt();
         } else if (kind == SyntaxKind.BREAKTK) {
-            terminalSymbol();
-            terminalSymbol();
+            breakStmt();
         } else if (kind == SyntaxKind.CONTINUETK) {
-            terminalSymbol();
-            terminalSymbol();
+            continueStmt();
         } else if (kind == SyntaxKind.RETURNTK) {
-            terminalSymbol();
-            if(expFirst(tokens.first().kind)) {
-                exp();
-            }
-            terminalSymbol();
+            returnStmt();
         } else if (kind == SyntaxKind.PRINTFTK) {
-            terminalSymbol();
-            terminalSymbol();
-            terminalSymbol();
-            while(tokens.first().kind == SyntaxKind.COMMA){
-                terminalSymbol();
-                exp();
-            }
-            terminalSymbol();
-            terminalSymbol();
+            printfStmt();
         } else {
             System.out.println("error!");
+            System.out.println(tokens.ntoken(0).line);
             return;
         }
         build.finishNode(new StmtNode());
+    }
+///
+    private void printfStmt() {
+        build.startNode(SyntaxKind.PRINTF_STMT);
+        terminalSymbol();
+        terminalSymbol();
+        terminalSymbol();
+        while(tokens.first().kind == SyntaxKind.COMMA){
+            terminalSymbol();
+            exp();
+        }
+        checkToken(SyntaxKind.RPARENT,Errorkind.R_PAREN_LACKED);
+        checkToken(SyntaxKind.SEMICN, Errorkind.SEMICOLON_LACKED);
+        build.finishNode(new PrintfStmtNode());
+    }
+
+    ///
+    private void returnStmt() {
+        build.startNode(SyntaxKind.RETURN_STMT);
+        terminalSymbol();
+        if(expFirst(tokens.first().kind)) {
+            exp();
+        }
+        checkToken(SyntaxKind.SEMICN,Errorkind.SEMICOLON_LACKED);
+        build.finishNode(new ReturnStmtNode());
+    }
+
+    private void continueStmt() {
+        build.startNode(SyntaxKind.CONTINUE_STMT);
+        terminalSymbol();
+        checkToken(SyntaxKind.SEMICN,Errorkind.SEMICOLON_LACKED);
+        build.finishNode(new ContinueStmtNode());
+    }
+
+    private void breakStmt() {
+        build.startNode(SyntaxKind.BREAK_STMT);
+        terminalSymbol();
+        checkToken(SyntaxKind.SEMICN,Errorkind.SEMICOLON_LACKED);
+        build.finishNode(new BreakStmtNode());
+    }
+
+    ///
+    private void whileStmt() {
+        build.startNode(SyntaxKind.WHILE_STMT);
+        terminalSymbol();
+        terminalSymbol();
+        cond();
+        checkToken(SyntaxKind.RPARENT,Errorkind.R_PAREN_LACKED);
+        stmt();
+        build.finishNode(new WhileStmtNode());
+    }
+
+    ///
+    private void ifStmt() {
+        build.startNode(SyntaxKind.IF_STMT);
+        terminalSymbol();
+        terminalSymbol();
+        cond();
+        checkToken(SyntaxKind.RPARENT,Errorkind.R_PAREN_LACKED);
+        stmt();
+        if(tokens.first().kind == SyntaxKind.ELSETK){
+            terminalSymbol();
+            stmt();
+        }
+        build.finishNode(new IfStmtNode());
     }
 
     private void cond() {
@@ -279,7 +356,7 @@ public class Parser {
             terminalSymbol();
             varDef();
         }
-        terminalSymbol();
+        checkToken(SyntaxKind.SEMICN,Errorkind.SEMICOLON_LACKED);
         build.finishNode(new VarDeclNode());
     }
 
@@ -289,7 +366,7 @@ public class Parser {
         while (tokens.first().kind == SyntaxKind.LBRACK) {
             terminalSymbol();
             constExp();
-            terminalSymbol();
+            checkToken(SyntaxKind.RBRACK,Errorkind.R_BRACKET_LACKED);
         }
         if (tokens.first().kind == SyntaxKind.ASSIGN) {
             terminalSymbol();
@@ -360,11 +437,11 @@ public class Parser {
         } else if (kind == SyntaxKind.IDENFR && tokens.ntoken(1).kind == SyntaxKind.LPARENT){
             terminalSymbol();
             terminalSymbol();
-            if(tokens.first().kind == SyntaxKind.RPARENT){
-                terminalSymbol();
+            if(!expFirst(tokens.first().kind)){
+                checkToken(SyntaxKind.RPARENT,Errorkind.R_PAREN_LACKED);
             } else {
                 funcRParams();
-                terminalSymbol();
+                checkToken(SyntaxKind.RPARENT,Errorkind.R_PAREN_LACKED);
             }
         } else if(kind == SyntaxKind.LPARENT || kind == SyntaxKind.IDENFR || kind == SyntaxKind.INTCON){
             primaryExp();
@@ -396,11 +473,11 @@ public class Parser {
         if(tokens.first().kind == SyntaxKind.LBRACK){
             terminalSymbol();
             exp();
-            terminalSymbol();
+            checkToken(SyntaxKind.RBRACK,Errorkind.R_BRACKET_LACKED);
             while(tokens.first().kind == SyntaxKind.LBRACK) {
                 terminalSymbol();
                 exp();
-                terminalSymbol();
+                checkToken(SyntaxKind.RBRACK,Errorkind.R_BRACKET_LACKED);
             }
         }
         build.finishNode(new LvalNode());
@@ -437,7 +514,7 @@ public class Parser {
             terminalSymbol();
             constDef();
         }
-        terminalSymbol();
+        checkToken(SyntaxKind.SEMICN, Errorkind.SEMICOLON_LACKED);
         build.finishNode(new ConstDeclNode());
     }
 
@@ -447,7 +524,7 @@ public class Parser {
         while (tokens.first().kind == SyntaxKind.LBRACK) {
             terminalSymbol();
             constExp();
-            terminalSymbol();
+            checkToken(SyntaxKind.RBRACK,Errorkind.R_BRACKET_LACKED);
         }
         terminalSymbol();
         constInitVal();
@@ -486,4 +563,11 @@ public class Parser {
         tokens.bump();
     }
 
+    private void checkToken(SyntaxKind a, Errorkind b){
+        if(tokens.first().kind == a){
+            terminalSymbol();
+        } else {
+            build.error(b,tokens.lastLinie());
+        }
+    }
 }

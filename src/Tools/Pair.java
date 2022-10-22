@@ -1,10 +1,7 @@
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+package Tools;
 
-// Pair class
-class Pair<U, V>
+// Tools.Pair class
+public class Pair<U, V>
 {
     public final U first;       // the first field of a pair
     public final V second;      // the second field of a pair
@@ -50,7 +47,7 @@ class Pair<U, V>
         return "(" + first + ", " + second + ")";
     }
 
-    // Factory method for creating a typed Pair immutable instance
+    // Factory method for creating a typed Tools.Pair immutable instance
     public static <U, V> Pair <U, V> of(U a, V b)
     {
         // calls private constructor

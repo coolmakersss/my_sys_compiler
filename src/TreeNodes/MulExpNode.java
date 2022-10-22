@@ -1,7 +1,13 @@
 package TreeNodes;
 
+import Parser.ErrorCheckCtx;
+import Parser.ErrorCheckRet;
+import Parser.Errorkind;
+import Tools.Pair;
+
 import java.io.IOException;
 import java.io.OutputStreamWriter;
+import java.util.ArrayList;
 
 import static Lexer.SyntaxKind.getPrint;
 import static Lexer.SyntaxKind.isParserToken;
@@ -17,4 +23,16 @@ public class MulExpNode extends Node {
         }
         //writer.append('<').append(getPrint(kind)).append('>').append("\n");
     }
+
+//    @Override
+//    public void checkError(ArrayList<Pair<Errorkind, Integer>> errorlist, ErrorCheckCtx ctx, ErrorCheckRet ret) {
+//        for(Node child: children){
+//            ErrorCheckRet ret1 = new ErrorCheckRet();
+//            child.checkError(errorlist, ctx, ret1);
+//            if(ret1.isConst){
+//                ret.isConst = true;
+//            }
+//            ret.dimension = ret1.dimension;
+//        }
+//    }
 }

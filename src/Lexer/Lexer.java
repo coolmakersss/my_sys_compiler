@@ -170,14 +170,14 @@ public class Lexer {
             String c = cursor.first();
             switch (c) {
                 case "\"" :
-                    if(afterEscapechar){
-                        cursor.bump();
-                        afterEscapechar=false;
-                    } else{
+                    //if(afterEscapechar){
+                    //    cursor.bump();
+                    //    afterEscapechar=false;
+                    //} else{
                         cursor.bump();
                         return;
-                    }
-                    break;
+                    //}
+                    //break;
                 case"\\":
                     if(afterEscapechar){
                         cursor.bump();
@@ -186,6 +186,7 @@ public class Lexer {
                         cursor.bump();
                         afterEscapechar=true;
                     }
+                    break;
                 default:
                     afterEscapechar = false;
                     cursor.bump();

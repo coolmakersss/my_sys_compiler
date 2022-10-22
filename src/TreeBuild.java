@@ -1,6 +1,9 @@
 import Lexer.SyntaxKind;
+import Tools.Pair;
+import TreeNodes.ErrorNode;
 import TreeNodes.Node;
 import TreeNodes.TokenNode;
+import Parser.*;
 
 import java.util.Stack;
 
@@ -29,6 +32,22 @@ public class TreeBuild {
 
     void terminalSymbol(SyntaxKind kind, String content, int line) {
         children.push(new TokenNode(kind, content, line));
+    }
+
+    public void error(Errorkind errorkind, int line) {
+        Node node = new ErrorNode(errorkind, line);
+        node.setNodeElement(SyntaxKind.ERROR, line);
+        if (errorkind != Errorkind.UNDEFINED_ERROR) {
+            children.push(node);
+            return;
+        }
+        Pair<SyntaxKind, Integer> tmp = parent.peek();
+        parent.pop();
+        while (children.size() > tmp.second) {
+            node.addChild(children.peek());
+            children.pop();
+        }
+        children.push(node);
     }
 
     public Node root() {
