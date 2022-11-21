@@ -1,4 +1,6 @@
 package TreeNodes;
+import Generation.BuildIRCtx;
+import Generation.BuildIRRet;
 import Lexer.SyntaxKind;
 import Parser.ErrorCheckCtx;
 import Parser.ErrorCheckRet;
@@ -39,6 +41,11 @@ public class Node {
     public void checkError(ArrayList<Pair<Errorkind, Integer>> errorlist, ErrorCheckCtx ctx, ErrorCheckRet ret) {
         for (Node child : children) {
             child.checkError(errorlist, ctx, ret);
+        }
+    }
+    public void buildIR(BuildIRCtx ctx, BuildIRRet ret) {
+        for (Node child : children) {
+            child.buildIR(ctx, ret);
         }
     }
 

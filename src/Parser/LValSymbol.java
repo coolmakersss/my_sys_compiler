@@ -1,5 +1,7 @@
 package Parser;
 
+import java.io.IOException;
+import java.io.OutputStreamWriter;
 import java.util.ArrayList;
 
 public class LValSymbol {
@@ -31,5 +33,36 @@ public class LValSymbol {
 
     public int getDimension() {
         return dimension.size();
+    }
+
+    public void print(OutputStreamWriter writer) throws IOException {
+        int size = 1;
+        for (Integer i : dimension) {
+            size *= i;
+        }
+        if (Symbol.IR) {
+            writer.append(String.valueOf(size)).append(" ");
+            for (Integer i : initVal) {
+                writer.append(String.valueOf(i)).append(" ");
+            }
+        } else {
+            writer.append(" : .word ");
+            if (initVal.isEmpty()) {
+                writer.append(" 0:").append(String.valueOf(size));
+            } else {
+                for (Integer i : initVal) {
+                    writer.append(String.valueOf(i)).append(" ");
+                }
+            }
+        }
+    }
+
+
+    //??未支持数组
+    public int getVal(ArrayList<Integer> dimension) {
+        if(initVal.isEmpty()){
+            return 0;
+        }
+        return initVal.get(0);
     }
 }

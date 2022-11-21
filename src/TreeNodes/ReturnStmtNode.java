@@ -1,5 +1,9 @@
 package TreeNodes;
 
+import Generation.BuildIRCtx;
+import Generation.BuildIRRet;
+import Generation.ControlFlowGraphBuilder;
+import Generation.Quaternion.Return;
 import Lexer.SyntaxKind;
 import Parser.ErrorCheckCtx;
 import Parser.ErrorCheckRet;
@@ -29,6 +33,22 @@ public class ReturnStmtNode extends Node {
             } else if(child.getKind() == SyntaxKind.EXP && ctx.inVoidFunc) {
                 errorlist.add(Pair.of(Errorkind.VOID_FUNC_RETURN_INTEGER,line));
             }
+        }
+    }
+
+    @Override
+    public void buildIR(BuildIRCtx ctx, BuildIRRet ret) {
+        String res = "";
+        for(Node child:children){
+            child.buildIR(ctx, ret);
+            if(child.getKind() == SyntaxKind.EXP){
+                res = ret.res;
+            }
+        }
+         if(res.isEmpty()){
+            ControlFlowGraphBuilder.getCFGB().insert(new Return("-"));
+        } else {
+            ControlFlowGraphBuilder.getCFGB().insert(new Return(res));
         }
     }
 }

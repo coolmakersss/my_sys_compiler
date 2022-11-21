@@ -1,5 +1,12 @@
 package TreeNodes;
 
+import Generation.BuildIRCtx;
+import Generation.BuildIRRet;
+import Generation.ControlFlowGraphBuilder;
+import Generation.Quaternion.Assign;
+import Generation.Quaternion.FuncCall;
+import Generation.Quaternion.GetReturn;
+import Generation.Quaternion.PushParam;
 import Lexer.SyntaxKind;
 import Parser.ErrorCheckCtx;
 import Parser.ErrorCheckRet;
@@ -11,6 +18,7 @@ import Tools.Pair;
 import java.util.ArrayList;
 
 public class UnaryExpNode extends Node {
+    private String res;
 
     @Override
     public void checkError(ArrayList<Pair<Errorkind, Integer>> errorlist, ErrorCheckCtx ctx, ErrorCheckRet ret) {
@@ -54,5 +62,62 @@ public class UnaryExpNode extends Node {
                 ret.val = ret1.val;
             }
         }
+    }
+
+    @Override
+    public void buildIR(BuildIRCtx ctx, BuildIRRet ret) {
+        //???
+        if(ctx.isLVal) {
+            children.get(0).buildIR(ctx, ret);
+            res = ret.res;
+            return;
+        }
+        if(children.get(0).getKind() == SyntaxKind.IDENFR) {
+            String name = null;
+            FuncSymbol funcSymbol = null;
+            ArrayList<String> args = new ArrayList<>();
+            for(Node child:children){
+                if(child.getKind() == SyntaxKind.IDENFR){
+                    name = ((TokenNode) child).getContent();
+                    funcSymbol = Symbol.getSymbol().getFunc(name);
+                }
+                child.buildIR(ctx, ret);
+                if(child.getKind() == SyntaxKind.FUNC_R_PARAMS){
+                    args = ret.args;
+                }
+            }
+            if(funcSymbol.isVoid()) res = "-";
+            else res = ControlFlowGraphBuilder.getCFGB().tmpVar();
+            String irFunc = Symbol.generateIRFunc(name);
+            for (int i = 0; i < args.size(); i++) {
+                ControlFlowGraphBuilder.getCFGB().insert(new PushParam(args.get(i), i));
+            }
+            ControlFlowGraphBuilder.getCFGB().insert(new FuncCall(irFunc));
+            if(!funcSymbol.isVoid()){
+                ControlFlowGraphBuilder.getCFGB().insert(new GetReturn(res));
+            }
+            ret.res =res;
+        } else {
+            for (Node child:children){
+                if(child.getKind() == SyntaxKind.PRIMARY_EXP || child.getKind() == SyntaxKind.UNARY_EXP){
+                    child.buildIR(ctx, ret);
+                    res = ret.res;
+                }
+            }
+        }
+        ctx.isConst = Symbol.exprResIsNumber(ret.res);
+        if(ctx.isConst || children.get(0).getKind() != SyntaxKind.UNARY_OP){
+            res = ret.res;
+        } else {
+            res = ControlFlowGraphBuilder.getCFGB().tmpVar();System.out.println(res+ret.res);
+            ControlFlowGraphBuilder.getCFGB().insert(new Assign(res,ret.res));
+        }
+        if(children.get(0).getKind() == SyntaxKind.UNARY_OP){
+            ctx.res = res;
+            children.get(0).buildIR(ctx, ret);
+            res = ctx.res;
+        }
+        ctx.isConst = false;
+        ret.res = res;
     }
 }

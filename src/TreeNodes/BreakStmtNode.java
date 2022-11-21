@@ -1,5 +1,9 @@
 package TreeNodes;
 
+import Generation.BuildIRCtx;
+import Generation.BuildIRRet;
+import Generation.ControlFlowGraphBuilder;
+import Generation.Quaternion.Jump;
 import Parser.ErrorCheckCtx;
 import Parser.ErrorCheckRet;
 import Parser.Errorkind;
@@ -26,5 +30,10 @@ public class BreakStmtNode extends Node {
         if (ctx.loopNum == 0) {
             errorlist.add(Pair.of(Errorkind.BREAK_CONTINUE_OUT_LOOP, children.get(0).getStartLine()));
         }
+    }
+
+    @Override
+    public void buildIR(BuildIRCtx ctx, BuildIRRet ret) {
+        ControlFlowGraphBuilder.getCFGB().insert(new Jump(ctx.breakBlock));
     }
 }

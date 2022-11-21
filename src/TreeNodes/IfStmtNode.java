@@ -1,5 +1,12 @@
 package TreeNodes;
 
+import Generation.BasicBlock;
+import Generation.BuildIRCtx;
+import Generation.BuildIRRet;
+import Generation.ControlFlowGraphBuilder;
+import Generation.Quaternion.JumpIfFalse;
+import Lexer.SyntaxKind;
+
 import java.io.IOException;
 import java.io.OutputStreamWriter;
 
@@ -10,5 +17,43 @@ public class IfStmtNode extends Node {
         for (Node child : children) {
             child.print(writer);
         }
+    }
+
+    @Override
+    public void buildIR(BuildIRCtx ctx, BuildIRRet ret) {
+        BasicBlock cfg3 = ctx.elseFinalBlock;
+        boolean needJumpelse = ctx.needJumpElse;
+
+        children.get(2).buildIR(ctx, ret);
+        boolean hasElse = false;
+        for(Node child:children){
+            if(child.getKind() == SyntaxKind.ELSETK){
+                hasElse = true;
+                break;
+            }
+        }
+        if(hasElse) {
+            BasicBlock elseCFG = ControlFlowGraphBuilder.getCFGB().newBasicBlock();
+            ControlFlowGraphBuilder.getCFGB().insert(new JumpIfFalse(elseCFG, ret.res));
+            ControlFlowGraphBuilder.getCFGB().changeCur(ControlFlowGraphBuilder.getCFGB().newBasicBlock());
+            BasicBlock finalCFG = ControlFlowGraphBuilder.getCFGB().newBasicBlock();
+            ctx.elseFinalBlock = finalCFG;
+            ctx.needJumpElse = true;
+            children.get(4).buildIR(ctx, ret);
+            ControlFlowGraphBuilder.getCFGB().changeCur(elseCFG);
+            ctx.needJumpElse = false;
+            children.get(6).buildIR(ctx, ret);
+            ControlFlowGraphBuilder.getCFGB().changeCur(finalCFG);
+        } else {
+            BasicBlock finalCFG = ControlFlowGraphBuilder.getCFGB().newBasicBlock();
+            ControlFlowGraphBuilder.getCFGB().insert(new JumpIfFalse(finalCFG, ret.res));
+            ControlFlowGraphBuilder.getCFGB().changeCur(ControlFlowGraphBuilder.getCFGB().newBasicBlock());
+            ctx.needJumpElse = false;
+            children.get(4).buildIR(ctx, ret);
+            ControlFlowGraphBuilder.getCFGB().changeCur(finalCFG);
+        }
+
+        ctx.elseFinalBlock = cfg3;
+        ctx.needJumpElse = needJumpelse;
     }
 }

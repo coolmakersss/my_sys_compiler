@@ -1,3 +1,6 @@
+import Generation.BuildIRCtx;
+import Generation.BuildIRRet;
+import Generation.ControlFlowGraphBuilder;
 import Lexer.*;
 import Parser.*;
 import Tools.Pair;
@@ -42,6 +45,38 @@ public class Compiler {
         fop1.close();
         writer.close();
         fop.close();
+
+
+        root.buildIR(new BuildIRCtx(),new BuildIRRet());
+        if(Symbol.MyOPT) {
+            //
+        }
+        if(Symbol.IR) {
+            fop1 = new FileOutputStream("data.txt");
+            writer1 = new OutputStreamWriter(fop1, "UTF-8");
+            OutputStream fop2 = new FileOutputStream("ir.txt");
+            OutputStreamWriter writer2 = new OutputStreamWriter(fop2, "UTF-8");
+            Symbol.getSymbol().printGlobalVar(writer1);
+            ControlFlowGraphBuilder.getCFGB().print(writer2);
+            writer1.close();
+            fop1.close();
+            writer2.close();
+            fop2.close();
+        } else {
+            ControlFlowGraphBuilder.getCFGB().allocateReg();
+            fop1 = new FileOutputStream("mips.txt");
+            writer1 = new OutputStreamWriter(fop1, "UTF-8");
+            writer1.append(".data\n");
+            Symbol.getSymbol().printGlobalVar(writer1);
+            writer1.append(".text\n");
+            writer1.append("jal func_main\n");
+            writer1.append("ori $v0, $0, 10\n");
+            writer1.append("syscall\n");
+            ControlFlowGraphBuilder.getCFGB().assembly(writer1);
+            writer1.close();
+            fop1.close();
+        }
+        Symbol.getSymbol().endBlock();
 
 
     }

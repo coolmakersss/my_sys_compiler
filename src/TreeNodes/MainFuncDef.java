@@ -1,5 +1,11 @@
 package TreeNodes;
 
+import Generation.BuildIRCtx;
+import Generation.BuildIRRet;
+import Generation.ControlFlowGraphBuilder;
+import Generation.Function;
+import Generation.Quaternion.LoadParam;
+import Generation.Quaternion.Return;
 import Lexer.SyntaxKind;
 import Parser.ErrorCheckCtx;
 import Parser.ErrorCheckRet;
@@ -44,5 +50,32 @@ public class MainFuncDef extends Node {
             errorlist.add(Pair.of(Errorkind.INT_FUNC_RETURN_LACKED,finishLine));
         }
         ctx.inVoidFunc = false;
+    }
+
+    @Override
+    public void buildIR(BuildIRCtx ctx, BuildIRRet ret) {
+        String name = "";
+        ArrayList<String> params = new ArrayList<>();
+        for(Node child:children){
+            if(child.getKind() == SyntaxKind.MAINTK){
+                name = ((TokenNode)child).getContent();
+            } else if(child.getKind() == SyntaxKind.LPARENT){
+                Symbol.getSymbol().startBlock();
+            } else if(child.getKind() == SyntaxKind.BLOCK) {
+                Symbol.getSymbol().addFunc(name);
+                String funcName = Symbol.generateIRFunc(name);
+                ControlFlowGraphBuilder.getCFGB().changeFunction(new Function(funcName, params.size()));
+                ControlFlowGraphBuilder.getCFGB().changeCur(ControlFlowGraphBuilder.getCFGB().newBasicBlock());
+                for(int i=0;i< params.size();i++){
+                    ControlFlowGraphBuilder.getCFGB().insert(new LoadParam(params.get(i),i));
+                }
+                ctx.afterFuncDef = true;
+            }
+            child.buildIR(ctx,ret);
+            if(child.getKind() == SyntaxKind.BLOCK) {
+                ControlFlowGraphBuilder.getCFGB().insert(new Return("-"));
+            }
+        }
+
     }
 }

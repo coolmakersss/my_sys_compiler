@@ -1,5 +1,7 @@
 package TreeNodes;
 
+import Generation.BuildIRCtx;
+import Generation.BuildIRRet;
 import Lexer.SyntaxKind;
 import Parser.ErrorCheckCtx;
 import Parser.ErrorCheckRet;
@@ -19,5 +21,10 @@ public class NumberNode extends Node {
                 ret.val = Integer.parseInt(content);
                 ret.isConst = true;
             }
+    }
+
+    @Override
+    public void buildIR(BuildIRCtx ctx, BuildIRRet ret) {
+        ret.res = ((TokenNode) children.get(0)).getContent();
     }
 }

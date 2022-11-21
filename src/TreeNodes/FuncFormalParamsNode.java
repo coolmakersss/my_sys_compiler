@@ -1,5 +1,7 @@
 package TreeNodes;
 
+import Generation.BuildIRCtx;
+import Generation.BuildIRRet;
 import Lexer.SyntaxKind;
 import Parser.ErrorCheckCtx;
 import Parser.ErrorCheckRet;
@@ -18,5 +20,18 @@ public class FuncFormalParamsNode extends Node {
                 ret.args.add(ret1.dimension);
             }
         }
+    }
+
+    @Override
+    public void buildIR(BuildIRCtx ctx, BuildIRRet ret) {
+        ret.clear();
+        ArrayList<String> args = new ArrayList<>();
+        for(Node child:children){
+            child.buildIR(ctx, ret);
+            if(child.getKind() == SyntaxKind.FUNC_F_PARAM) {
+                args.add(ret.param);
+            }
+        }
+        ret.args = args;
     }
 }
