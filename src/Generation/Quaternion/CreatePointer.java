@@ -1,5 +1,7 @@
 package Generation.Quaternion;
 
+import Generation.Function;
+
 import java.io.IOException;
 import java.io.OutputStreamWriter;
 
@@ -19,9 +21,19 @@ public class CreatePointer extends Quaternion {
     }
 
     @Override
+    public void assembly(OutputStreamWriter writer, Function function) throws IOException {
+
+    }
+
+    @Override
     public String getDefine() {
         return name;
     }
+    @Override
+    public void setDefine(String s) {
+        name = s;
+    }
+
     public int getSize(){
         return size;
     }

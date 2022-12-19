@@ -30,7 +30,7 @@ public class GetInt extends Quaternion {
     @Override
     public void assembly(OutputStreamWriter writer, Function function) throws IOException {
         if(assigned.charAt(0) == '$'){
-            writer.append("move ").append(assigned).append(", $v0");
+            writer.append("move ").append(assigned).append(", $v0").append("\n");
         } else {
             writer.append("sw $v0, ").append(assigned.substring(2)).append("($sp)").append("\n");
         }

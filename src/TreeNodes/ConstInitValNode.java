@@ -15,7 +15,7 @@ public class ConstInitValNode extends Node {
             child.buildIR(ctx, ret);
             if(child.getKind() == SyntaxKind.CONST_EXP){
                 init.add(ret.res);
-            } else if(child.getKind() == SyntaxKind.INIT_VAL) {
+            } else if(child.getKind() == SyntaxKind.CONST_INIT_VAL) {
                 init.addAll(ret.init);
             }
         }

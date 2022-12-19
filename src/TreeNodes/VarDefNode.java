@@ -53,7 +53,7 @@ public class VarDefNode extends Node {
                 name = ((TokenNode) child).getContent();
             }
             child.buildIR(ctx, ret);
-            if (child.getKind() == SyntaxKind.EXP) {
+            if (child.getKind() == SyntaxKind.CONST_EXP) {
                 dimension.add(Integer.parseInt(ret.res));
             } else if (child.getKind() == SyntaxKind.INIT_VAL) {
                 if(flag){

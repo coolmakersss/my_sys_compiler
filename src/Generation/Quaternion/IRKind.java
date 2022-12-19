@@ -12,6 +12,8 @@ public enum IRKind {
     GT_BIN,
     LE_BIN,
     LT_BIN,
+    OR_BIN,
+    AND_BIN,
     PLUS_BIN,
     MINU_BIN,
     MUL_BIN,

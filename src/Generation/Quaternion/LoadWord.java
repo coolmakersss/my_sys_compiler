@@ -50,7 +50,7 @@ public class LoadWord extends Quaternion {
     @Override
     public void assembly(OutputStreamWriter writer, Function function) throws IOException {
         if(pointer.charAt(0) == 'a') {
-            writer.append("addi $27，$sp, ").append(pointer.substring(5)).append("\n");
+            writer.append("addi $27, $sp, ").append(pointer.substring(5)).append("\n");
             pointer = "$27";
         } else if(pointer.charAt(0) == 'v') {
             writer.append("la $27, ").append(pointer).append("\n");
@@ -67,7 +67,7 @@ public class LoadWord extends Quaternion {
                 writer.append("lw $28, ").append(offset.substring(2)).append("($sp)").append("\n");
                 offset = "$28";
             }
-            writer.append("sll $28").append(offset).append(", 2").append("\n");
+            writer.append("sll $28, ").append(offset).append(", 2").append("\n");
             writer.append("add $27, $28, ").append(pointer).append("\n");
             pointer = "$27";
             offset = "0";

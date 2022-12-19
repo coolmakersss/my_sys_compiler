@@ -23,7 +23,10 @@ public class IfStmtNode extends Node {
     public void buildIR(BuildIRCtx ctx, BuildIRRet ret) {
         BasicBlock cfg3 = ctx.elseFinalBlock;
         boolean needJumpelse = ctx.needJumpElse;
+        BasicBlock tmp = ctx.trueBlock;
 
+        BasicBlock trueCFG = ControlFlowGraphBuilder.getCFGB().newBasicBlock();
+        ctx.trueBlock = trueCFG;
         children.get(2).buildIR(ctx, ret);
         boolean hasElse = false;
         for(Node child:children){
@@ -34,9 +37,9 @@ public class IfStmtNode extends Node {
         }
         if(hasElse) {
             BasicBlock elseCFG = ControlFlowGraphBuilder.getCFGB().newBasicBlock();
-            ControlFlowGraphBuilder.getCFGB().insert(new JumpIfFalse(elseCFG, ret.res));
-            ControlFlowGraphBuilder.getCFGB().changeCur(ControlFlowGraphBuilder.getCFGB().newBasicBlock());
             BasicBlock finalCFG = ControlFlowGraphBuilder.getCFGB().newBasicBlock();
+            ControlFlowGraphBuilder.getCFGB().insert(new JumpIfFalse(elseCFG, ret.res));
+            ControlFlowGraphBuilder.getCFGB().changeCur(trueCFG);
             ctx.elseFinalBlock = finalCFG;
             ctx.needJumpElse = true;
             children.get(4).buildIR(ctx, ret);
@@ -47,13 +50,14 @@ public class IfStmtNode extends Node {
         } else {
             BasicBlock finalCFG = ControlFlowGraphBuilder.getCFGB().newBasicBlock();
             ControlFlowGraphBuilder.getCFGB().insert(new JumpIfFalse(finalCFG, ret.res));
-            ControlFlowGraphBuilder.getCFGB().changeCur(ControlFlowGraphBuilder.getCFGB().newBasicBlock());
+            ControlFlowGraphBuilder.getCFGB().changeCur(trueCFG);
             ctx.needJumpElse = false;
             children.get(4).buildIR(ctx, ret);
             ControlFlowGraphBuilder.getCFGB().changeCur(finalCFG);
         }
 
         ctx.elseFinalBlock = cfg3;
+        ctx.trueBlock = tmp;
         ctx.needJumpElse = needJumpelse;
     }
 }

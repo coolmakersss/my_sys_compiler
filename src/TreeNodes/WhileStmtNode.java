@@ -37,12 +37,15 @@ public class WhileStmtNode extends Node {
     public void buildIR(BuildIRCtx ctx, BuildIRRet ret) {
         BasicBlock cfg2 = ctx.breakBlock;
         boolean inLoop = ctx.stmtAfterLoop;
+        BasicBlock tmp = ctx.trueBlock;
 
-        children.get(2).buildIR(ctx, ret);
         BasicBlock finalBB = ControlFlowGraphBuilder.getCFGB().newBasicBlock();
+        BasicBlock body = ControlFlowGraphBuilder.getCFGB().newBasicBlock();
+        ctx.trueBlock = body;
+        children.get(2).buildIR(ctx, ret);
         CondNode condition = ctx.condition;
         ControlFlowGraphBuilder.getCFGB().insert(new JumpIfFalse(finalBB, ret.res));
-        BasicBlock body = ControlFlowGraphBuilder.getCFGB().newBasicBlock();
+
         ControlFlowGraphBuilder.getCFGB().changeCur(body);
         ctx.breakBlock = finalBB;
         ctx.stmtAfterLoop = true;
@@ -50,6 +53,7 @@ public class WhileStmtNode extends Node {
         children.get(4).buildIR(ctx, ret);
 
         ctx.breakBlock = cfg2;
+        ctx.trueBlock = tmp;
         ctx.stmtAfterLoop = inLoop;
         ctx.condition = condition;
         ControlFlowGraphBuilder.getCFGB().changeCur(finalBB);

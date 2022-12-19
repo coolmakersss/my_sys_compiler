@@ -21,6 +21,9 @@ public class Quaternion {
 
     public void assembly(OutputStreamWriter writer, Function function) throws IOException {}
 
+    public IRKind getKind() {
+        return kind;
+    }
 
     public void setDefine(String s) {}
 

@@ -7,6 +7,7 @@ public class BuildIRCtx {
     public String res;
     public CondNode condition;
     public BasicBlock continueBlock, breakBlock, elseFinalBlock;
+    public BasicBlock trueBlock,lorBlock; //短路求值
     public BuildIRCtx() {
         isConst = false;
         afterFuncDef = false;

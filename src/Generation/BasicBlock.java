@@ -73,15 +73,26 @@ public class BasicBlock {
     public void rename(HashMap<String, Integer> variable2Register, HashMap<String, Integer> variableInMemory, HashMap<String, Integer> arrayInMemory) {
         for(Quaternion i = head;i!=null;i=i.next){
             String define = i.getDefine();
-            if(define!=null && variableInMemory.containsKey(define)){
-                i.setDefine("sp"+ variableInMemory.get(define));
+            if(define!=null) {
+                if(variableInMemory.containsKey(define)){
+                    i.setDefine("sp"+ variableInMemory.get(define));
+                } else if(arrayInMemory.containsKey(define)) {
+                    i.setDefine("array"+ arrayInMemory.get(define));
+                }
             }
+
             HashSet<String> use = i.getUse();
             for(String k:use){
                 if(variableInMemory.containsKey(k)){
                     i.setUse(k,"sp"+ variableInMemory.get(k));
+                } else if(arrayInMemory.containsKey(k)) {
+                    i.setUse(k,"array"+ arrayInMemory.get(k));
                 }
             }
         }
+    }
+
+    public String getTag() {
+        return tag;
     }
 }

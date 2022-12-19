@@ -1,5 +1,7 @@
 package Generation;
 
+import Generation.Quaternion.CreatePointer;
+import Generation.Quaternion.IRKind;
 import Generation.Quaternion.Quaternion;
 
 import java.io.IOException;
@@ -30,6 +32,7 @@ public class Function {
         tail = null;
         variable2Register = new HashMap<>();
         variableInMemory = new HashMap<>();
+        arrayInMemory = new HashMap<>();
         registerInMemory = new HashMap<>();
     }
 
@@ -68,14 +71,19 @@ public class Function {
 
     public void allocateReg() {
         for(BasicBlock i = head;i!=null;i=i.nextBB){
-            for(Quaternion j = i.head;j!=null;j=j.next){
+            for(Quaternion j = i.head;j!=null;j=j.next){System.out.println(j);
                 String define = j.getDefine();
                 if(define!=null) {System.out.println(define);
-                    variableInMemory.put(define,memory);
-                    memory += 4;
+                    if(j.getKind() == IRKind.CREATE_POINTER){//System.out.println("@@@@@@");
+                        arrayInMemory.put(define,memory);
+                        memory += ((CreatePointer) j).getSize()*4;
+                    } else {
+                        variableInMemory.put(define,memory);
+                        memory += 4;
+                    }
                 }
             }
-        }
+        }System.out.println(variableInMemory);
         registerInMemory.put(31,memory);
         memory += 4;
     }

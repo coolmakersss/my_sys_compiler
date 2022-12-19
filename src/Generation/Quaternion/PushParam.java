@@ -51,9 +51,9 @@ public class PushParam extends Quaternion {
                         .append(String.valueOf(-4*(num-3))).append("($sp)").append("\n");
             } else {
                 if(integer.charAt(0) == 's'){
-                    writer.append("lw $27, ").append(integer.substring(2)).append("($sp)");
+                    writer.append("lw $27, ").append(integer.substring(2)).append("($sp)").append("\n");
                 } else if(integer.charAt(0) == 'a') {
-                    writer.append("addi $27").append(", $sp, ").append(integer.substring(5));
+                    writer.append("addi $27").append(", $sp, ").append(integer.substring(5)).append("\n");
                 } else {
                     writer.append("li $27, ").append(integer).append("\n");
                 }

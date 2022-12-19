@@ -3,6 +3,7 @@ package TreeNodes;
 import Generation.BuildIRCtx;
 import Generation.BuildIRRet;
 import Generation.ControlFlowGraphBuilder;
+import Generation.Quaternion.LoadPointer;
 import Generation.Quaternion.LoadWord;
 import Lexer.SyntaxKind;
 import Parser.ErrorCheckCtx;
@@ -75,7 +76,7 @@ public class LvalNode extends Node {
         }
         String offset = null;
         if(!indices.isEmpty()){
-            //不支持数组
+            offset = lValSymbol.findOffset(indices);
         } else if(lValSymbol.isGlobal()){
             offset = "0";
         }
@@ -93,9 +94,9 @@ public class LvalNode extends Node {
             res = ControlFlowGraphBuilder.getCFGB().tmpVar();
             String varName = Symbol.generateIRVar(name,lValSymbol.getId());
             if(indices.size() == lValSymbol.dimension.size()){
-                ControlFlowGraphBuilder.getCFGB().insert(new LoadWord(res,varName,"0"));
+                ControlFlowGraphBuilder.getCFGB().insert(new LoadWord(res,varName,offset));
             } else {
-                System.out.println("no array!");
+                ControlFlowGraphBuilder.getCFGB().insert(new LoadPointer(res,varName,offset));
             }
             ret.res = res;
         }
